@@ -1,0 +1,36 @@
+name: update lists
+
+on:
+  push:
+    paths:
+      - 'parser/parser.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: забираем репозиторий
+        uses: actions/checkout@v4
+
+      - name: ставим python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: ставим зависимости
+        run: pip install requests
+
+      - name: запускаем парсер
+        run: python parser/parser.py
+
+      - name: коммитим proxy.txt и block.txt обратно в репо
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add proxy.txt block.txt
+          git diff --staged --quiet || git commit -m "обновил proxy.txt и block.txt"
+          git push
