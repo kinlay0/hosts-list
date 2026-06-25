@@ -158,6 +158,7 @@
 37.230.192.51 a-api.anthropic.com
 37.230.192.51 a-cdn.anthropic.com
 37.230.192.51 a-cdn.anthropic.com
+37.230.192.51 assets-proxy.anthropic.com
 37.230.192.51 anthropic.com
 37.230.192.51 anthropic.com
 37.230.192.51 api.anthropic.com

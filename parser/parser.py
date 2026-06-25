@@ -1,37 +1,40 @@
 import requests
 
-# ссылка на список хостов с гитхаба
-url = "https://raw.githubusercontent.com/V3nilla/IPSets-For-Bypass-in-Russia/refs/heads/main/%D0%A0%D0%B0%D0%B7%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%BC%D0%BD%D0%BE%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%B0%20%D1%81%D0%B5%D1%80%D0%B2%D0%B8%D1%81%D0%BE%D0%B2(%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%20-%20ChatGPT)/hosts"
+url = "https://raw.githubusercontent.com/kinlay0/IPSets-For-Bypass-in-Russia/refs/heads/main/%D0%A0%D0%B0%D0%B7%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%BC%D0%BD%D0%BE%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%B0%20%D1%81%D0%B5%D1%80%D0%B2%D0%B8%D1%81%D0%BE%D0%B2(%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%20-%20ChatGPT)/hosts"
+
+url_block = ["https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt"]
+
+
+def download(link):
+    try:
+        r = requests.get(link, timeout=5)
+        if r.status_code == 200:
+            return r.text.splitlines()
+        print("сервер ответил не 200, код:", r.status_code)
+    except:
+        print("не получилось скачать:", link)
+    return []
+
 
 print("скачиваю файл...")
-
-lines = []
-try:
-    r = requests.get(url, timeout=5)
-    if r.status_code == 200:
-        lines = r.text.splitlines()
-        print("скачал, строк:", len(lines))
-    else:
-        print("сервер ответил не 200, код:", r.status_code)
-except:
-    print("не получилось скачать, что-то с интернетом или гитхабом")
+lines = download(url)
+print("скачал, строк:", len(lines))
 
 if not lines:
     print("пробую локальный файл hosts.txt")
     try:
-        f = open('parser/hosts.txt', 'r', encoding='utf-8', errors='ignore')
-        lines = f.readlines()
-        f.close()
+        with open('parser/hosts.txt', 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
         print("открыл, строк:", len(lines))
     except FileNotFoundError:
         print("нет файла parser/hosts.txt, дальше делать нечего")
         exit()
 
-proxy = open('proxy.txt', 'w', encoding='utf-8')
-block = open('block.txt', 'w', encoding='utf-8')
+block_domains = []
+block_seen = set()
 
 proxy_count = 0
-block_count = 0
+proxy = open('proxy.txt', 'w', encoding='utf-8')
 
 for line in lines:
     line = line.strip()
@@ -42,18 +45,34 @@ for line in lines:
     if len(parts) < 2:
         continue
 
-    ip = parts[0]
-    domain = parts[1]
-    domain = domain.split('#')[0].strip()  # убирается коммент после домена 
+    ip, domain = parts
+    domain = domain.split('#')[0].strip()
 
     if ip == '0.0.0.0':
-        block.write(domain + '\n')
-        block_count += 1
+        if domain not in block_seen:
+            block_seen.add(domain)
+            block_domains.append(domain)
     else:
         proxy.write(ip + ' ' + domain + '\n')
         proxy_count += 1
 
 proxy.close()
-block.close()
 
-print("готово! proxy.txt -", proxy_count, "строк, block.txt -", block_count, "строк")
+for b_url in url_block:
+    print("скачиваю block-лист:", b_url)
+    b_lines = download(b_url)
+
+    added = 0
+    for line in b_lines:
+        domain = line.strip().split('#')[0].strip()
+        if domain and domain not in block_seen:
+            block_seen.add(domain)
+            block_domains.append(domain)
+            added += 1
+    print("добавил доменов:", added)
+
+with open('block.txt', 'w', encoding='utf-8') as f:
+    for domain in block_domains:
+        f.write(domain + '\n')
+
+print("готово! proxy.txt -", proxy_count, "строк, block.txt -", len(block_domains), "строк")
