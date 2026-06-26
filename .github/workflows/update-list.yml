@@ -5,6 +5,8 @@ on:
     paths:
       - 'parser/parser.py'
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
 
 permissions:
   contents: write
