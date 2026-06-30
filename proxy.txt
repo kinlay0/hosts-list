@@ -28,6 +28,12 @@
 173.245.59.219 rutor.is
 172.64.33.155 d.rutor.info
 172.64.33.155 d.rutor.is
+185.199.109.133 objects.githubusercontent.com
+185.199.109.133 raw.githubusercontent.com
+185.199.109.133 release-assets.githubusercontent.com
+185.199.108.133 private-user-images.githubusercontent.com
+185.199.108.133 gist.githubusercontent.com
+185.199.108.133 avatars.githubusercontent.com
 37.230.192.51 amd.com
 37.230.192.51 amd.com
 37.230.192.51 www.amd.com
