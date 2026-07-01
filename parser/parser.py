@@ -42,6 +42,7 @@ if not lines:
 block_domains = []
 block_seen = set()
 
+proxy_seen = set()
 proxy_count = 0
 proxy = open('proxy.txt', 'w', encoding='utf-8')
 
@@ -62,8 +63,11 @@ for line in lines:
             block_seen.add(domain)
             block_domains.append(domain)
     else:
-        proxy.write(ip + ' ' + domain + '\n')
-        proxy_count += 1
+        key = ip + ' ' + domain
+        if key not in proxy_seen:
+            proxy_seen.add(key)
+            proxy.write(ip + ' ' + domain + '\n')
+            proxy_count += 1
 
 proxy.close()
 
